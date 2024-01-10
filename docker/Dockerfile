@@ -1,5 +1,5 @@
-# 
-# can probably be migrated to a smaller image
+# Base image
+# Can probably be migrated to a smaller image
 FROM ubuntu:jammy-20231211.1
 
 # Install all software under /opt/software:
@@ -17,8 +17,10 @@ ADD environment.yml /opt/software/
 # Build the deseq2 environment based on the yml file
 RUN conda env create -f /opt/software/environment.yml
 
-# add to the PATH. Otherwise, conda can swallow return codes
+# Add to the PATH. Otherwise, conda can swallow return codes
 ENV PATH="/opt/software/miniconda/envs/deseq2/bin:${PATH}"
 
+# Open conda in shell to activate env to install spaMM, 
+# then devtools-build spatialGE
 SHELL ["conda", "run", "-n", "spatialge", "/bin/bash", "-c"]
 RUN Rscript build.R
