@@ -22,9 +22,10 @@ dependencies:
   - ncurses=6.4
   - openssl=3.2.0
   - r-base=4.3.2
+  - r-concaveman=1.1.0
   - r-devtools=2.4.5
-  - r-terra=1.7_65
-  - r-units=0.8_5
+  - r-optparse=1.7.4
   - r-sf=1.0_15
   - r-spdep=1.3_1
-  - r-concaveman=1.1.0
+  - r-terra=1.7_65
+  - r-units=0.8_5
