@@ -7,6 +7,7 @@ dependencies:
   - bioconductor-complexheatmap=2.18.0
   - cmake=3.28.1
   - geos=3.12.1
+  - glpk=5.0
   - gsl=2.7
   - libblas=3.9.0
   - libcurl=8.5.0
@@ -24,7 +25,10 @@ dependencies:
   - r-base=4.3.2
   - r-concaveman=1.1.0
   - r-devtools=2.4.5
+  - r-igraph=1.5.1
+  - r-matrix=1.6_5
   - r-optparse=1.7.4
+  - r-rgeos=0.6_4
   - r-sf=1.0_15
   - r-spdep=1.3_1
   - r-terra=1.7_65
