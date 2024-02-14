@@ -9,3 +9,5 @@ RUN micromamba install -y -n base -f /tmp/environment.yml \
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 RUN R -e 'install.packages("spaMM", repos="http://cran.us.r-project.org")'
 RUN R -e 'library("devtools"); devtools::install_github("fridleylab/spatialGE", quiet=TRUE, dependencies=TRUE)'
+
+ADD prep_stlist.R /usr/local/bin/
