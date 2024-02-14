@@ -1,4 +1,4 @@
-prep_stlist <- function(counts_file, coords_file) {
+prep_stlist <- function(counts_file, coords_file, sample_name) {
     # STlist expects that the first column is the gene names- so we don't use row.names arg
     rnacounts <- read.table(counts_file, sep='\t', header=T, check.names=F)
 
@@ -53,15 +53,15 @@ prep_stlist <- function(counts_file, coords_file) {
 
     # We will use a list of dataframes in the call to STlist
     rnacounts_list <- list()
-    rnacounts_list[[opt$sample_name]] <- rnacounts
+    rnacounts_list[[sample_name]] <- rnacounts
     spotcoords_list <- list()
-    spotcoords_list[[opt$sample_name]] <- spotcoords
+    spotcoords_list[[sample_name]] <- spotcoords
 
     # Import input data into spatialGE object
     spat <- STlist(
         rnacounts=rnacounts_list,
         spotcoords=spotcoords_list, 
-        samples=c(opt$sample_name)
+        samples=c(sample_name)
     )
     return(spat)
 }
