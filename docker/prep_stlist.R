@@ -1,6 +1,59 @@
-prep_stlist <- function(counts_file, coords_file, sample_name) {
-    # STlist expects that the first column is the gene names- so we don't use row.names arg
-    rnacounts <- read.table(counts_file, sep='\t', header=T, check.names=F)
+library(tibble)
+library(dplyr)
+library(spatialGE)
+
+
+prep_stlist <- function(counts_file, coords_file, sample_name, gene_mapping_df, source_gene_id, target_gene_id) {
+    
+    # This function returns a list containing the column-name mapping (so we can eventually map back to the
+    # original barcodes) and an STList instance.
+    
+    # Note that the `gene_mapping_df`, `source_gene_id`, and `target_gene_id` are optional and 
+    # are used to map from other identifier systems for situations when we need to compare
+    # against a curated database like MSigDB, etc. If they are not supplied, no mapping
+    # is performed.
+
+    rnacounts <- read.table(counts_file, sep='\t', header=T, check.names=F, row.names=1)
+    barcodes_from_counts <- colnames(rnacounts)[1:dim(rnacounts)[2]]
+    # if the gene_mapping_df was passed:
+    if (!missing(gene_mapping_df)) {
+
+        rnacounts = merge(
+                        rnacounts,
+                        gene_mapping_df[,c(source_gene_id, target_gene_id)],
+                        by.x=0,
+                        by.y=source_gene_id
+                    )
+        # If no remaining rows, error out- the join didn't produce any results so it's most likely that the
+        # gene identifier was not correct
+        if(dim(rnacounts)[1] == 0){
+            message('After mapping the gene identifiers, there were no remaining rows. Was the choice of gene identifier correct?')
+            quit(status=1)
+        }
+
+        # remove the duplicate rows which can result:
+        rnacounts <- rnacounts %>% distinct()
+
+        # in the case of a trivial mapping (e.g. if source and target are BOTH "SYMBOL")
+        # we get col names like 'Row.names' and 'SYMBOL.1'. This handles that edge case.
+        if (target_gene_id == source_gene_id){
+            gene_id_col <- 'Row.names'
+        } else {
+            gene_id_col <- target_gene_id
+        }
+        # reorder- we need the gene identifier as the first column.
+        ordering <- c(gene_id_col, barcodes_from_counts)
+    } else {
+        # no remapping needed- simply take the row names as the gene ID.
+        # STList expects the first column to be the gene, NOT the rownames.
+        # This function is not explicit that the rownames become the first column
+        # so we set the ordering and sort just to be certain.
+        rnacounts <- tibble::rownames_to_column(rnacounts, var='__gene__')
+        ordering <- c('__gene__', barcodes_from_counts)
+    }
+
+    # now sort the columns such that the first column is the gene ID:
+    rnacounts <- rnacounts[,ordering]
 
     # Same as for the counts, the expectation is that the coordinates file does not
     # have row.names and instead has the barcodes in the first column. For now, however,
@@ -15,7 +68,6 @@ prep_stlist <- function(counts_file, coords_file, sample_name) {
     # For example, if the matrix is filtered for QC, there may be poor quality spots
     # that were filtered out. 
     # The opposite is not the case since we cannot have a barcode without a position.
-    barcodes_from_counts <- colnames(rnacounts)[2:dim(rnacounts)[2]] 
     diff_set <- setdiff(barcodes_from_counts, rownames(spotcoords))
     num_invalid_barcodes <- length(diff_set)
     if (num_invalid_barcodes > 0) {
@@ -48,7 +100,6 @@ prep_stlist <- function(counts_file, coords_file, sample_name) {
         stringsAsFactors=F)
     colnames(rnacounts) <- proper_names
 
-
     spotcoords[,1] <- make.names(spotcoords[,1]) 
 
     # We will use a list of dataframes in the call to STlist
@@ -63,5 +114,5 @@ prep_stlist <- function(counts_file, coords_file, sample_name) {
         spotcoords=spotcoords_list, 
         samples=c(sample_name)
     )
-    return(spat)
+    return(list(spat=spat, colname_mapping=colname_mapping))
 }
