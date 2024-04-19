@@ -17,7 +17,8 @@ prep_stlist <- function(counts_file, coords_file, sample_name, gene_mapping_df, 
     barcodes_from_counts <- colnames(rnacounts)[1:dim(rnacounts)[2]]
     # if the gene_mapping_df was passed:
     if (!missing(gene_mapping_df)) {
-
+        # without `distinct`, the following `merge` can exhaust memory
+        gene_mapping_df <- gene_mapping_df[,c(source_gene_id, target_gene_id)] %>% distinct()
         rnacounts = merge(
                         rnacounts,
                         gene_mapping_df[,c(source_gene_id, target_gene_id)],
