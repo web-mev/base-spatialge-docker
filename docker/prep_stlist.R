@@ -3,7 +3,7 @@ library(dplyr)
 library(spatialGE)
 
 
-prep_stlist <- function(counts_file, coords_file, sample_name, gene_mapping_df, source_gene_id, target_gene_id) {
+prep_stlist <- function(counts_file, coords_file, sample_name, xpos_col, ypos_col, gene_mapping_df, source_gene_id, target_gene_id) {
     
     # This function returns a list containing the column-name mapping (so we can eventually map back to the
     # original barcodes) and an STList instance.
@@ -61,9 +61,9 @@ prep_stlist <- function(counts_file, coords_file, sample_name, gene_mapping_df, 
     # we set the row names and then later alter.
     spotcoords <- read.table(coords_file, sep='\t', row.names=1, header=T, check.names=T)
 
-    # only take the first two columns for the (x,y) positions. Additional columns
+    # only take the first columns corresponding to the (x,y) positions. Additional columns
     # can cause problems downstream
-    spotcoords <- spotcoords[,c(1,2)]
+    spotcoords <- spotcoords[, make.names(c(xpos_col, ypos_col))]
 
     # the barcodes in coords dataframe can be a superset of the count matrix columns.
     # For example, if the matrix is filtered for QC, there may be poor quality spots
